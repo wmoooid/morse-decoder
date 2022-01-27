@@ -266,36 +266,34 @@
           .trim();
       };
 
-      button.addEventListener('click', () => {
-        if (longPress) {
-          return false;
-        } else {
-          setSpace();
+      let pushTime = 0;
+
+      button.addEventListener('mousedown', () => {
+        clearInterval(spaceTimer);
+        timer = setInterval(() => {
+          pushTime += 1;
+        }, 100);
+        return pushTime;
+      });
+
+      button.addEventListener('mouseup', () => {
+        clearInterval(timer);
+        setSpace();
+        if (pushTime < 3) {
           input.value += '.';
           display.textContent = decodeMorse(input.value);
-        }
-      });
-
-      button.addEventListener('touchstart', () => {
-        longPress = false;
-        clearInterval(spaceTimer);
-        pressTimer = window.setTimeout(() => {
-          setSpace();
+        } else {
           input.value += '-';
           display.textContent = decodeMorse(input.value);
-          longPress = true;
-        }, length.value);
-      });
-
-      button.addEventListener('touchend', () => {
-        clearTimeout(pressTimer);
+        }
+        pushTime = 0;
       });
 
       function setSpace() {
         spaceTimer = window.setInterval(() => {
           input.value += ' ';
           display.textContent = decodeMorse(input.value);
-        }, length.value);
+        }, 300);
       }
     </script>
   </body>
