@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <title>Morse decoder</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #dfdce8;
+        font-family: Roboto, sans-serif;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 90vh;
+      }
+
+      #input {
+        display: none;
+      }
+
+      #main {
+        display: flex;
+        flex-direction: column;
+        width: 350px;
+        min-height: 520px;
+        padding: 25px;
+        background: #f6f5fa;
+        border: #d1ced9 1px solid;
+        border-radius: 12px;
+      }
+
+      #title {
+        display: flex;
+        align-items: center;
+        margin-top: 0;
+        margin-bottom: 32px;
+        font-size: 16px;
+        line-height: 1;
+        font-weight: 500;
+        color: #343040;
+      }
+
+      #title > svg {
+        margin-right: 8px;
+      }
+
+      #controls {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #display {
+        overflow-wrap: break-word;
+        min-height: 63px;
+        margin-bottom: 32px;
+        padding: 12px 16px;
+        font-size: 36px;
+        line-height: 1;
+        font-weight: 400;
+        color: #423a59;
+        background: #fff;
+        border: #716c80 1px solid;
+        border-radius: 8px;
+      }
+
+      #length-box {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      #length {
+        min-height: 56px;
+        display: block;
+        margin-bottom: 32px;
+        padding: 16px;
+        font-size: 16px;
+        line-height: 1;
+        color: #343040;
+        background: transparent;
+        border: #716c80 1px solid;
+        border-radius: 8px;
+      }
+
+      #length:focus-visible {
+        outline: #6750a4 1px solid;
+      }
+
+      #length-label {
+        position: absolute;
+        top: -6px;
+        left: 12px;
+        padding: 0 4px;
+        font-size: 12px;
+        line-height: 1;
+        font-weight: 500;
+        color: #79747e;
+        background: #f6f5fa;
+      }
+
+      #length:focus-visible ~ label {
+        color: #745eb0;
+      }
+
+      #button {
+        position: relative;
+        height: 225px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 12px 16px;
+        overflow: hidden;
+        border: none;
+        border-radius: 8px;
+        outline: none;
+        background: #6750a4;
+        transition: background-color 0.3s;
+      }
+
+      #button:hover,
+      #button:focus {
+        background-color: #745eb0;
+      }
+
+      #button:before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: block;
+        width: 0;
+        padding: 0;
+        border-radius: 100%;
+        background-color: rgba(236, 240, 241, 0.3);
+        transform: translate(-50%, -50%);
+      }
+
+      #button:active:before {
+        width: 125%;
+        padding-top: 125%;
+        transition: width 0.2s ease-out, padding-top 0.2s ease-out;
+      }
+
+      #button::after {
+        content: '';
+        width: 100%;
+        height: 100%;
+        background-image: url(data:image/svg+xml,%3Csvg%20width%3D%2265%22%20height%3D%2265%22%20viewbox%3D%220%200%2065%2065%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Cg%20clip-path%3D%22url%28%23clip0%5f2%5f340%29%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Cpath%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20d%3D%22M24.5%2030.4733V20.5C24.5%2016.82%2027.4867%2013.8333%2031.1667%2013.8333C34.8467%2013.8333%2037.8333%2016.82%2037.8333%2020.5V30.4733C41.06%2028.3133%2043.1667%2024.66%2043.1667%2020.5C43.1667%2013.86%2037.8067%208.5%2031.1667%208.5C24.5267%208.5%2019.1667%2013.86%2019.1667%2020.5C19.1667%2024.66%2021.2733%2028.3133%2024.5%2030.4733ZM50.74%2042.82L38.6333%2036.7933C38.18%2036.6067%2037.7%2036.5%2037.1933%2036.5H35.1667V20.5C35.1667%2018.2867%2033.38%2016.5%2031.1667%2016.5C28.9533%2016.5%2027.1667%2018.2867%2027.1667%2020.5V49.14C17.5667%2047.1133%2017.7267%2047.14%2017.38%2047.14C16.5533%2047.14%2015.8067%2047.4867%2015.2733%2048.02L13.1667%2050.1533L26.34%2063.3267C27.06%2064.0467%2028.0733%2064.5%2029.1667%2064.5H47.2733C49.2733%2064.5%2050.82%2063.0333%2051.1133%2061.0867L53.1133%2047.0333C53.14%2046.8467%2053.1667%2046.66%2053.1667%2046.5C53.1667%2044.8467%2052.1533%2043.4067%2050.74%2042.82Z%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20fill%3D%22white%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20fill-opacity%3D%220.2%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Cclippath%20id%3D%22clip0%5f2%5f340%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22white%22%20transform%3D%22translate%280.5%200.5%29%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Fclippath%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3C%2Fsvg%3E);
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <main id="main">
+        <h2 id="title">
+          <svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1
+          2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V6H20V18ZM6 10H8V12H6V10ZM6 14H14V16H6V14ZM16 14H18V16H16V14ZM10
+          10H18V12H10V10Z"
+              fill="#343040"
+            />
+          </svg>
+          Morse decoder
+        </h2>
+        <div id="controls"></div>
+      </main>
+    </div>
+    <script>
+      const controls = document.getElementById('controls');
+
+      const display = document.createElement('div');
+      const input = document.createElement('input');
+      const button = document.createElement('button');
+      const lengthBox = document.createElement('div');
+      const length = document.createElement('input');
+      const lengthLabel = document.createElement('label');
+
+      display.id = 'display';
+      input.id = 'input';
+      button.id = 'button';
+      lengthBox.id = 'length-box';
+      length.id = 'length';
+      length.type = 'number';
+      lengthLabel.id = 'length-label';
+      lengthLabel.setAttribute('for', 'length');
+
+      display.textContent = 'Hello!';
+      lengthLabel.textContent = 'Dash length';
+      length.value = '300';
+
+      lengthBox.append(length);
+      lengthBox.append(lengthLabel);
+
+      controls.append(display);
+      controls.append(input);
+      controls.append(lengthBox);
+      controls.append(button);
+
+      let spaceTimer;
+
+      const MORSE_CODE = {
+        '-----': '0',
+        '.----': '1',
+        '..---': '2',
+        '...--': '3',
+        '....-': '4',
+        '.....': '5',
+        '-....': '6',
+        '--...': '7',
+        '---..': '8',
+        '----.': '9',
+        '.-': 'A',
+        '-...': 'B',
+        '-.-.': 'C',
+        '-..': 'D',
+        '.': 'E',
+        '..-.': 'F',
+        '--.': 'G',
+        '....': 'H',
+        '..': 'I',
+        '.---': 'J',
+        '-.-': 'K',
+        '.-..': 'L',
+        '--': 'M',
+        '-.': 'N',
+        '---': 'O',
+        '.--.': 'P',
+        '--.-': 'Q',
+        '.-.': 'R',
+        '...': 'S',
+        '-': 'T',
+        '..-': 'U',
+        '...-': 'V',
+        '.--': 'W',
+        '-..-': 'X',
+        '-.--': 'Y',
+        '--..': 'Z',
+        '-.-.--': '!',
+        '.-.-.-': '.',
+        '--..--': ',',
+      };
+
+      decodeMorse = (morseCode) => {
+        return morseCode
+          .split('   ')
+          .map((word) =>
+            word
+              .split(' ')
+              .map((character) => MORSE_CODE[character])
+              .join(''),
+          )
+          .join(' ')
+          .trim();
+      };
+
+      button.addEventListener('click', () => {
+        if (longPress) {
+          return false;
+        } else {
+          setSpace();
+          input.value += '.';
+          display.textContent = decodeMorse(input.value);
+        }
+      });
+
+      button.addEventListener('touchstart', () => {
+        longPress = false;
+        clearInterval(spaceTimer);
+        pressTimer = window.setTimeout(() => {
+          setSpace();
+          input.value += '-';
+          display.textContent = decodeMorse(input.value);
+          longPress = true;
+        }, length.value);
+      });
+
+      button.addEventListener('touchend', () => {
+        clearTimeout(pressTimer);
+      });
+
+      function setSpace() {
+        spaceTimer = window.setInterval(() => {
+          input.value += ' ';
+          display.textContent = decodeMorse(input.value);
+        }, length.value);
+      }
+    </script>
+  </body>
+</html>
