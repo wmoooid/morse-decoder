@@ -179,6 +179,9 @@
       </main>
     </div>
     <script>
+      window.oncontextmenu = function () {
+        return false;
+      };
       const controls = document.getElementById('controls');
 
       const display = document.createElement('div');
@@ -268,16 +271,18 @@
 
       let pushTime = 0;
 
-      button.addEventListener('mousedown', () => {
+      button.addEventListener('pointerdown', () => {
         clearInterval(spaceTimer);
+        console.log('down');
         timer = setInterval(() => {
           pushTime += 1;
         }, 100);
         return pushTime;
       });
 
-      button.addEventListener('mouseup', () => {
+      button.addEventListener('pointerup', () => {
         clearInterval(timer);
+        console.log('up');
         setSpace();
         if (pushTime < 3) {
           input.value += '.';
